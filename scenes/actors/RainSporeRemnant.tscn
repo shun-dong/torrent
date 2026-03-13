@@ -1,0 +1,24 @@
+[gd_scene load_steps=4 format=3 uid="uid://de0jme1cbcrqn"]
+
+[ext_resource type="Script" path="res://scenes/actors/rain_spore_remnant.gd" id="1_4h8ig"]
+[ext_resource type="Texture2D" path="res://asserts/third_party/Top-Down_Roguelike_Game_Kit_Pixel_Art/3 Dungeon Enemies/Other/Shadow.png" id="2_qka8b"]
+
+[sub_resource type="CapsuleShape2D" id="1"]
+radius = 6.0
+height = 18.0
+
+[node name="RainSporeRemnant" type="CharacterBody2D"]
+collision_layer = 4
+collision_mask = 3
+script = ExtResource("1_4h8ig")
+
+[node name="Shadow" type="Sprite2D" parent="."]
+position = Vector2(0, 9)
+texture = ExtResource("2_qka8b")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+position = Vector2(0, -8)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(0, 4)
+shape = SubResource("1")

@@ -11,8 +11,13 @@ config_version=5
 [application]
 
 config/name="torrent"
+run/main_scene="res://scenes/main/Main.tscn"
 config/features=PackedStringArray("4.4", "GL Compatibility")
 config/icon="res://icon.svg"
+
+[autoload]
+
+GameState="*res://autoload/game_state.gd"
 
 [rendering]
 
