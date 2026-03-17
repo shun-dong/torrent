@@ -35,12 +35,20 @@ func initialize_arena(spawn_id: String) -> void:
 
 
 func _setup_player(spawn_id: String) -> void:
-	if player == null:
-		player = PLAYER_SCENE.instantiate()
-		$Actors.add_child(player)
-		player.died.connect(_on_player_died)
-		player.interaction_prompt_changed.connect(_on_player_prompt_changed)
-		print("[V01_Home] Player created")
+	# Disconnect existing signals and remove old player to prevent issues
+	if player != null and is_instance_valid(player):
+		if player.died.is_connected(_on_player_died):
+			player.died.disconnect(_on_player_died)
+		if player.interaction_prompt_changed.is_connected(_on_player_prompt_changed):
+			player.interaction_prompt_changed.disconnect(_on_player_prompt_changed)
+		player.queue_free()
+		player = null
+
+	player = PLAYER_SCENE.instantiate()
+	$Actors.add_child(player)
+	player.died.connect(_on_player_died)
+	player.interaction_prompt_changed.connect(_on_player_prompt_changed)
+	print("[V01_Home] Player created")
 	hud.bind_player(player)
 	player.apply_state(GameState.get_player_state())
 	player.global_position = _spawn_for_id(spawn_id).global_position
@@ -84,14 +92,14 @@ func _play_opening_cutscene() -> void:
 
 func _spawn_for_id(spawn_id: String) -> Marker2D:
 	match spawn_id:
-		"V02Entrance":
+		"V02Entrance", "from_V02":
 			return v02_spawn
-		_:
+		"bed", "start", _:
 			return bed_spawn
 
 
-func _on_player_prompt_changed(text: String, visible: bool) -> void:
-	hud.set_prompt(text, visible)
+func _on_player_prompt_changed(text: String, is_visible: bool) -> void:
+	hud.set_prompt(text, is_visible)
 
 
 func _on_interactable(kind: String, checkpoint_id: String, message: String) -> void:
@@ -129,8 +137,6 @@ func _on_player_died() -> void:
 	if main != null and main.has_method("respawn_player"):
 		main.respawn_player()
 	else:
-		# Fallback: local respawn
-		player.apply_state(GameState.get_player_state())
-		player.global_position = _spawn_for_id(GameState.get_continue_spawn_id()).global_position
-		player.current_state = "idle"
+		# Fallback: local respawn with proper player recreation
+		_setup_player(GameState.recent_rainsleep_id)
 		hud.show_status("采薇在最近的雨眠点醒来。")

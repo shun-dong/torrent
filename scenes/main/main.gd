@@ -1,6 +1,7 @@
 extends Node
 
 const MAIN_MENU_SCENE := preload("res://scenes/ui/MainMenu.tscn")
+const DEBUG_MANAGER_SCENE := preload("res://scenes/debug/DebugManager.tscn")
 const SCENE_PATHS := {
 	"V01": "res://scenes/world/V01_Home.tscn",
 	"V02": "res://scenes/world/V02_VillageRoad.tscn",
@@ -16,11 +17,17 @@ const SCENE_PATHS := {
 var menu: Control
 var current_arena: Node
 var in_pause_menu := false
+var debug_manager: CanvasLayer
 
 
 func _ready() -> void:
 	print("[Main] Main scene ready")
 	add_to_group("main")
+
+	# Initialize debug manager
+	debug_manager = DEBUG_MANAGER_SCENE.instantiate()
+	add_child(debug_manager)
+
 	menu = MAIN_MENU_SCENE.instantiate()
 	add_child(menu)
 	menu.start_requested.connect(_on_start_requested)
@@ -31,6 +38,9 @@ func _ready() -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
+	# Don't process pause if debug menu is visible
+	if debug_manager != null and debug_manager.teleport_menu_visible:
+		return
 	if event.is_action_pressed("pause") and current_arena != null:
 		if menu.visible:
 			_resume_game()
@@ -61,14 +71,14 @@ func respawn_player() -> void:
 	print("[Main] Respawning player at rainsleep point: ", GameState.recent_rainsleep_id)
 	# Get the scene ID for the rainsleep point
 	var respawn_scene_id := GameState.get_rainsleep_scene_id()
-	print("[Main] Respawn scene ID: ", respawn_scene_id)
+	print("[Main] Respawn scene ID: ", respawn_scene_id, ", current scene: ", GameState.current_scene_id)
 
 	if respawn_scene_id != GameState.current_scene_id:
-		# Need to switch scenes
+		# Need to switch scenes - use call_deferred to avoid physics conflicts
 		GameState.current_scene_id = respawn_scene_id
 		call_deferred("_load_arena", GameState.recent_rainsleep_id)
 	else:
-		# Same scene, just reposition player
+		# Same scene, just reposition and reset player
 		if current_arena != null and current_arena.has_method("initialize_arena"):
 			current_arena.initialize_arena(GameState.recent_rainsleep_id)
 
@@ -123,8 +133,8 @@ func _on_portal_triggered(target_path: String, spawn_id: String) -> void:
 			GameState.current_scene_id = id
 			print("[Main] Set current_scene_id to: ", id)
 			break
-	# Use call_deferred to avoid physics query conflicts
-	call_deferred("_load_arena", spawn_id)
+	# Load arena immediately for smoother transition
+	_load_arena(spawn_id)
 
 
 func _show_pause_menu() -> void:

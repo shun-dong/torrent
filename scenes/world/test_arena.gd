@@ -17,11 +17,19 @@ func _ready() -> void:
 
 
 func initialize_arena(spawn_id: String) -> void:
-	if player == null:
-		player = PLAYER_SCENE.instantiate()
-		$Actors.add_child(player)
-		player.died.connect(_on_player_died)
-		player.interaction_prompt_changed.connect(_on_player_prompt_changed)
+	# Disconnect existing signals to prevent double-connection on respawn
+	if player != null and is_instance_valid(player):
+		if player.died.is_connected(_on_player_died):
+			player.died.disconnect(_on_player_died)
+		if player.interaction_prompt_changed.is_connected(_on_player_prompt_changed):
+			player.interaction_prompt_changed.disconnect(_on_player_prompt_changed)
+		player.queue_free()
+		player = null
+
+	player = PLAYER_SCENE.instantiate()
+	$Actors.add_child(player)
+	player.died.connect(_on_player_died)
+	player.interaction_prompt_changed.connect(_on_player_prompt_changed)
 	hud.bind_player(player)
 	player.apply_state(GameState.get_player_state())
 	player.global_position = _spawn_for_id(spawn_id).global_position
@@ -32,8 +40,8 @@ func _spawn_for_id(spawn_id: String) -> Marker2D:
 	return shelter_spawn if spawn_id == "shelter" else start_spawn
 
 
-func _on_player_prompt_changed(text: String, visible: bool) -> void:
-	hud.set_prompt(text, visible)
+func _on_player_prompt_changed(text: String, is_visible: bool) -> void:
+	hud.set_prompt(text, is_visible)
 
 
 func _on_interactable(kind: String, checkpoint_id: String, message: String) -> void:
@@ -51,7 +59,6 @@ func _on_interactable(kind: String, checkpoint_id: String, message: String) -> v
 
 func _on_player_died() -> void:
 	var restored_state := GameState.handle_player_death()
-	player.apply_state(restored_state)
-	player.global_position = _spawn_for_id(GameState.get_continue_spawn_id()).global_position
-	player.current_state = "idle"
+	# Respawn by reinitializing arena with proper player recreation
+	call_deferred("initialize_arena", GameState.recent_rainsleep_id)
 	hud.show_status("采薇在最近的雨眠点醒来。")

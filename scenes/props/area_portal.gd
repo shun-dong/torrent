@@ -5,7 +5,7 @@ class_name AreaPortal
 @export var target_scene_path: String = ""
 @export var target_spawn_id: String = ""
 @export var portal_id: String = ""
-@export var cooldown: float = 1.0  # 传送后冷却时间，防止反复触发
+@export var cooldown: float = 0.3  # 传送后冷却时间，防止反复触发
 
 signal portal_triggered(target_path: String, spawn_id: String)
 

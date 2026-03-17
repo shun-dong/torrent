@@ -1,0 +1,55 @@
+[gd_scene load_steps=2 format=3 uid="uid://c1o8t1kp3sx0f"]
+
+[ext_resource type="Script" path="res://scenes/debug/debug_manager.gd" id="1_d2s4f"]
+
+[node name="DebugManager" type="CanvasLayer"]
+layer = 100
+script = ExtResource("1_d2s4f")
+
+[node name="DebugInfo" type="Label" parent="."]
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 23.0
+grow_horizontal = 2
+theme_override_colors/font_color = Color(0, 1, 0, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 2
+text = "Debug Mode | F1:传送 F2:无敌[OFF] F3:清敌 F4:死亡"
+horizontal_alignment = 1
+
+[node name="TeleportPanel" type="Panel" parent="."]
+visible = false
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -150.0
+offset_top = -200.0
+offset_right = 150.0
+offset_bottom = 200.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="CurrentRoomLabel" type="Label" parent="TeleportPanel"]
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 23.0
+grow_horizontal = 2
+theme_override_colors/font_color = Color(1, 1, 0, 1)
+text = "当前: V01 (采薇的家)"
+horizontal_alignment = 1
+
+[node name="ScrollContainer" type="ScrollContainer" parent="TeleportPanel"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = 30.0
+offset_bottom = -10.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="RoomList" type="VBoxContainer" parent="TeleportPanel/ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3

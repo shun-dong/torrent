@@ -125,6 +125,10 @@ func can_parry_attack(attacker_position: Vector2) -> bool:
 func receive_damage(amount: int, from_position: Vector2) -> void:
 	if current_state == "dead":
 		return
+	# Check for god mode
+	var debug_manager := get_tree().get_first_node_in_group("debug_manager")
+	if debug_manager != null and debug_manager.god_mode:
+		return
 	if can_parry_attack(from_position):
 		return
 	health -= amount

@@ -83,7 +83,7 @@ polygon = PackedVector2Array(-16, -24, 16, -24, 16, 24, -16, 24)
 position = Vector2(-100, 0)
 
 [node name="V03Entrance" type="Marker2D" parent="SpawnPoints"]
-position = Vector2(140, 0)
+position = Vector2(120, 0)
 
 [node name="Actors" type="Node2D" parent="."]
 

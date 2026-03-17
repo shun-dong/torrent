@@ -72,7 +72,7 @@ shape = SubResource("3")
 position = Vector2(-60, 20)
 
 [node name="V02Spawn" type="Marker2D" parent="SpawnPoints"]
-position = Vector2(140, 0)
+position = Vector2(120, 0)
 
 [node name="Actors" type="Node2D" parent="."]
 

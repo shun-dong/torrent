@@ -45,7 +45,21 @@
 
 ## 协作原则
 
-- 以 `documents/week1.md` 作为第一周范围基准。
-- `data/` 只保留当前切片真正需要的数据。
-- 当前原型阶段优先复用 `asserts/third_party/Top-Down_Roguelike_Game_Kit_Pixel_Art/` 中的测试素材，不为正式美术返工阻塞开发。
-- 模糊设定先在周计划中拍板，再进入实现。
+- ## Sources of Truth
+
+  - For Godot engine, API, node, scene, input, export, and other code-level details, consult the official stable docs first: https://docs.godotengine.org/en/stable/
+  - For game design, content, narrative, scope, and feature intent, consult the documents in [documents/](C:\Users\liuSu\Projects\torrent\documents).
+  - For command-line Godot workflows, prefer using `$godot-cli` when relevant.
+
+  ## Weekly Execution
+
+  - Execute strictly against the current weekly plan in the active `document/week*.md` file for that sprint.
+  - Do not add work outside the current week's scope unless the weekly document is updated first.
+  - Treat the weekly document as a live execution tracker, not a static plan.
+
+  ## Update Discipline
+
+  - Update the active `week*.md` promptly when work starts, changes, or finishes.
+  - Change completed todo items from `- [ ]` to `- [x]`.
+  - Record encountered problems and the adopted solutions in the active weekly document.
+  - Keep updates concise, factual, and aligned with the current state of the codebase and design docs.
