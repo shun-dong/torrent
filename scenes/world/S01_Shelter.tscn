@@ -1,0 +1,103 @@
+[gd_scene load_steps=10 format=3 uid="uid://s01shelter001"]
+
+[ext_resource type="Script" path="res://scenes/world/s01_shelter.gd" id="1_s01s"]
+[ext_resource type="PackedScene" path="res://scenes/ui/HUD.tscn" id="2_hud"]
+[ext_resource type="PackedScene" path="res://scenes/props/Interactable.tscn" id="3_interact"]
+[ext_resource type="PackedScene" path="res://scenes/props/AreaPortal.tscn" id="4_portal"]
+
+[sub_resource type="RectangleShape2D" id="1"]
+size = Vector2(320, 16)
+
+[sub_resource type="RectangleShape2D" id="2"]
+size = Vector2(16, 180)
+
+[sub_resource type="RectangleShape2D" id="3"]
+size = Vector2(24, 8)
+
+[sub_resource type="RectangleShape2D" id="4"]
+size = Vector2(120, 80)
+
+[sub_resource type="RectangleShape2D" id="5"]
+size = Vector2(48, 16)
+
+[node name="S01Shelter" type="Node2D"]
+script = ExtResource("1_s01s")
+
+[node name="Ground" type="Polygon2D" parent="."]
+color = Color(0.25, 0.3, 0.32, 1)
+polygon = PackedVector2Array(-160, -96, 160, -96, 160, 96, -160, 96)
+
+[node name="SafeZone" type="Polygon2D" parent="."]
+color = Color(0.35, 0.42, 0.45, 1)
+polygon = PackedVector2Array(-80, -40, 80, -40, 80, 40, -80, 40)
+
+[node name="Walls" type="Node2D" parent="."]
+
+[node name="TopWall" type="StaticBody2D" parent="Walls"]
+position = Vector2(0, -104)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Walls/TopWall"]
+shape = SubResource("1")
+
+[node name="BottomWall" type="StaticBody2D" parent="Walls"]
+position = Vector2(0, 104)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Walls/BottomWall"]
+shape = SubResource("1")
+
+[node name="LeftWall" type="StaticBody2D" parent="Walls"]
+position = Vector2(-168, 0)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Walls/LeftWall"]
+shape = SubResource("2")
+
+[node name="RightWall" type="StaticBody2D" parent="Walls"]
+position = Vector2(168, 0)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Walls/RightWall"]
+shape = SubResource("2")
+
+[node name="SafeZoneCollision" type="StaticBody2D" parent="Walls"]
+position = Vector2(0, 0)
+
+[node name="SpawnPoints" type="Node2D" parent="."]
+
+[node name="G03Entrance" type="Marker2D" parent="SpawnPoints"]
+position = Vector2(-100, 0)
+
+[node name="ShelterPoint" type="Marker2D" parent="SpawnPoints"]
+position = Vector2(60, 0)
+
+[node name="Actors" type="Node2D" parent="."]
+
+[node name="Interactables" type="Node2D" parent="."]
+
+[node name="RainSleepPoint" parent="Interactables" instance=ExtResource("3_interact")]
+position = Vector2(60, 0)
+prompt_text = "E 雨眠"
+interaction_message = "雨眠完成：生命与体力恢复，并记录为最近安全点。"
+interaction_kind = "checkpoint"
+checkpoint_id = "shelter"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Interactables/RainSleepPoint"]
+shape = SubResource("5")
+
+[node name="ShelterNote" parent="Interactables" instance=ExtResource("3_interact")]
+position = Vector2(-60, -50)
+prompt_text = "E 查看"
+interaction_message = "避难所日志：'这里暂时安全，但活雨越来越近了。山海的回响在更深处等待。'"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Interactables/ShelterNote"]
+shape = SubResource("3")
+
+[node name="Portals" type="Node2D" parent="."]
+
+[node name="ToG03" parent="Portals" instance=ExtResource("4_portal")]
+position = Vector2(-150, 0)
+target_scene_path = "res://scenes/world/G03_AbandonedFarm.tscn"
+target_spawn_id = "S01Entrance"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Portals/ToG03"]
+shape = SubResource("3")
+
+[node name="HUD" parent="." instance=ExtResource("2_hud")]

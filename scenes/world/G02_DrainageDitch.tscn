@@ -1,0 +1,121 @@
+[gd_scene load_steps=12 format=3 uid="uid://g02ditch0001"]
+
+[ext_resource type="Script" path="res://scenes/world/g02_drainage_ditch.gd" id="1_g02d"]
+[ext_resource type="PackedScene" path="res://scenes/ui/HUD.tscn" id="2_hud"]
+[ext_resource type="PackedScene" path="res://scenes/props/Interactable.tscn" id="3_interact"]
+[ext_resource type="PackedScene" path="res://scenes/props/AreaPortal.tscn" id="4_portal"]
+[ext_resource type="PackedScene" path="res://scenes/actors/RainBugSwarm.tscn" id="5_enemy2"]
+
+[sub_resource type="RectangleShape2D" id="1"]
+size = Vector2(320, 16)
+
+[sub_resource type="RectangleShape2D" id="2"]
+size = Vector2(16, 180)
+
+[sub_resource type="RectangleShape2D" id="3"]
+size = Vector2(24, 8)
+
+[sub_resource type="RectangleShape2D" id="4"]
+size = Vector2(200, 40)
+
+[sub_resource type="RectangleShape2D" id="5"]
+size = Vector2(40, 24)
+
+[sub_resource type="RectangleShape2D" id="6"]
+size = Vector2(32, 48)
+
+[node name="G02DrainageDitch" type="Node2D"]
+script = ExtResource("1_g02d")
+
+[node name="Ground" type="Polygon2D" parent="."]
+color = Color(0.15, 0.2, 0.18, 1)
+polygon = PackedVector2Array(-160, -96, 160, -96, 160, 96, -160, 96)
+
+[node name="Ditch" type="Polygon2D" parent="."]
+color = Color(0.25, 0.3, 0.28, 1)
+polygon = PackedVector2Array(-100, -20, 100, -20, 100, 20, -100, 20)
+
+[node name="Water" type="Polygon2D" parent="."]
+color = Color(0.2, 0.28, 0.32, 0.8)
+polygon = PackedVector2Array(-80, -10, 80, -10, 80, 10, -80, 10)
+
+[node name="Walls" type="Node2D" parent="."]
+
+[node name="TopWall" type="StaticBody2D" parent="Walls"]
+position = Vector2(0, -104)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Walls/TopWall"]
+shape = SubResource("1")
+
+[node name="BottomWall" type="StaticBody2D" parent="Walls"]
+position = Vector2(0, 104)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Walls/BottomWall"]
+shape = SubResource("1")
+
+[node name="LeftWall" type="StaticBody2D" parent="Walls"]
+position = Vector2(-168, 0)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Walls/LeftWall"]
+shape = SubResource("2")
+
+[node name="RightWall" type="StaticBody2D" parent="Walls"]
+position = Vector2(168, 0)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Walls/RightWall"]
+shape = SubResource("2")
+
+[node name="DitchCollision" type="StaticBody2D" parent="Walls"]
+position = Vector2(0, 0)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Walls/DitchCollision"]
+shape = SubResource("4")
+
+[node name="SpawnPoints" type="Node2D" parent="."]
+
+[node name="G01Entrance" type="Marker2D" parent="SpawnPoints"]
+position = Vector2(-100, 0)
+
+[node name="G03Entrance" type="Marker2D" parent="SpawnPoints"]
+position = Vector2(100, 0)
+
+[node name="Actors" type="Node2D" parent="."]
+
+[node name="Enemy1" parent="Actors" instance=ExtResource("5_enemy2")]
+position = Vector2(-40, 40)
+
+[node name="Enemy2" parent="Actors" instance=ExtResource("5_enemy2")]
+position = Vector2(50, -50)
+
+[node name="Enemy3" parent="Actors" instance=ExtResource("5_enemy2")]
+position = Vector2(0, 60)
+
+[node name="Interactables" type="Node2D" parent="."]
+
+[node name="TutorialSwarm" parent="Interactables" instance=ExtResource("3_interact")]
+position = Vector2(-120, -60)
+prompt_text = "E 查看"
+interaction_message = "警告：雨虫群在积水处蠕动，靠近会爆裂。它们不可弹反，保持距离。"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Interactables/TutorialSwarm"]
+shape = SubResource("5")
+
+[node name="Portals" type="Node2D" parent="."]
+
+[node name="ToG01" parent="Portals" instance=ExtResource("4_portal")]
+position = Vector2(-150, 0)
+target_scene_path = "res://scenes/world/G01_OutskirtsEntry.tscn"
+target_spawn_id = "G02Entrance"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Portals/ToG01"]
+shape = SubResource("3")
+
+[node name="ToG03" parent="Portals" instance=ExtResource("4_portal")]
+position = Vector2(150, 0)
+target_scene_path = "res://scenes/world/G03_AbandonedFarm.tscn"
+target_spawn_id = "G02Entrance"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Portals/ToG03"]
+shape = SubResource("3")
+
+[node name="HUD" parent="." instance=ExtResource("2_hud")]

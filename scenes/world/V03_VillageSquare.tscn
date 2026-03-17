@@ -1,0 +1,112 @@
+[gd_scene load_steps=10 format=3 uid="uid://v03square0001"]
+
+[ext_resource type="Script" path="res://scenes/world/v03_village_square.gd" id="1_v03s"]
+[ext_resource type="PackedScene" path="res://scenes/ui/HUD.tscn" id="2_hud"]
+[ext_resource type="PackedScene" path="res://scenes/props/Interactable.tscn" id="3_interact"]
+[ext_resource type="PackedScene" path="res://scenes/props/AreaPortal.tscn" id="4_portal"]
+
+[sub_resource type="RectangleShape2D" id="1"]
+size = Vector2(320, 16)
+
+[sub_resource type="RectangleShape2D" id="2"]
+size = Vector2(16, 180)
+
+[sub_resource type="RectangleShape2D" id="3"]
+size = Vector2(24, 8)
+
+[sub_resource type="RectangleShape2D" id="4"]
+size = Vector2(96, 32)
+
+[sub_resource type="RectangleShape2D" id="5"]
+size = Vector2(48, 16)
+
+[node name="V03VillageSquare" type="Node2D"]
+script = ExtResource("1_v03s")
+
+[node name="Ground" type="Polygon2D" parent="."]
+color = Color(0.3, 0.32, 0.26, 1)
+polygon = PackedVector2Array(-160, -96, 160, -96, 160, 96, -160, 96)
+
+[node name="Platform" type="Polygon2D" parent="."]
+color = Color(0.4, 0.38, 0.34, 1)
+polygon = PackedVector2Array(-60, -40, 60, -40, 60, 20, -60, 20)
+
+[node name="Walls" type="Node2D" parent="."]
+
+[node name="TopWall" type="StaticBody2D" parent="Walls"]
+position = Vector2(0, -104)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Walls/TopWall"]
+shape = SubResource("1")
+
+[node name="BottomWall" type="StaticBody2D" parent="Walls"]
+position = Vector2(0, 104)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Walls/BottomWall"]
+shape = SubResource("1")
+
+[node name="LeftWall" type="StaticBody2D" parent="Walls"]
+position = Vector2(-168, 0)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Walls/LeftWall"]
+shape = SubResource("2")
+
+[node name="RightWall" type="StaticBody2D" parent="Walls"]
+position = Vector2(168, 0)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Walls/RightWall"]
+shape = SubResource("2")
+
+[node name="Stage" type="StaticBody2D" parent="Walls"]
+position = Vector2(0, -20)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Walls/Stage"]
+shape = SubResource("4")
+
+[node name="StageVisual" type="Polygon2D" parent="Walls/Stage"]
+color = Color(0.45, 0.42, 0.38, 1)
+polygon = PackedVector2Array(-48, -16, 48, -16, 48, 16, -48, 16)
+
+[node name="SpawnPoints" type="Node2D" parent="."]
+
+[node name="V02Entrance" type="Marker2D" parent="SpawnPoints"]
+position = Vector2(-100, 0)
+
+[node name="V04Entrance" type="Marker2D" parent="SpawnPoints"]
+position = Vector2(100, 0)
+
+[node name="StageFront" type="Marker2D" parent="SpawnPoints"]
+position = Vector2(0, 30)
+
+[node name="Actors" type="Node2D" parent="."]
+
+[node name="Interactables" type="Node2D" parent="."]
+
+[node name="ShanhaiEcho" parent="Interactables" instance=ExtResource("3_interact")]
+position = Vector2(0, -10)
+prompt_text = "E 聆听"
+interaction_message = "山海的回响：'采薇，永宁村不再安全。去郊区，那里有避难所。我会在那里等你。'"
+interaction_kind = "message"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Interactables/ShanhaiEcho"]
+shape = SubResource("5")
+
+[node name="Portals" type="Node2D" parent="."]
+
+[node name="ToV02" parent="Portals" instance=ExtResource("4_portal")]
+position = Vector2(-150, 0)
+target_scene_path = "res://scenes/world/V02_VillageRoad.tscn"
+target_spawn_id = "V03Entrance"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Portals/ToV02"]
+shape = SubResource("3")
+
+[node name="ToV04" parent="Portals" instance=ExtResource("4_portal")]
+position = Vector2(150, 0)
+target_scene_path = "res://scenes/world/V04_VillageGate.tscn"
+target_spawn_id = "V03Entrance"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Portals/ToV04"]
+shape = SubResource("3")
+
+[node name="HUD" parent="." instance=ExtResource("2_hud")]

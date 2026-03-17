@@ -99,8 +99,8 @@ func load_csv_dict(path: String) -> Dictionary:
 func new_game() -> void:
 	runtime_active = true
 	karma = 0
-	recent_rainsleep_id = "start"
-	current_scene_id = "test_arena"
+	recent_rainsleep_id = "bed"
+	current_scene_id = "V01"
 	current_player_state = default_player_state()
 	stats_changed.emit(get_runtime_snapshot())
 

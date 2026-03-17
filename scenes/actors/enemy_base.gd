@@ -5,6 +5,7 @@ signal defeated(enemy_id: String)
 const FRAME_SIZE := Vector2i(32, 32)
 
 @export var enemy_id := "EN_G01"
+@export var enemy_asset_id := "4"  # 素材包中的敌人编号 (1-4)
 @export var move_speed := 40.0
 @export var max_health := 3
 @export var attack_damage := 1
@@ -17,7 +18,7 @@ var facing := Vector2.DOWN
 var facing_key := "down"
 var state_timer := 0.0
 var attack_resolved := false
-var player: Node
+var player: Node2D
 
 @onready var sprite: AnimatedSprite2D = $AnimatedSprite2D
 
@@ -136,21 +137,22 @@ func _animation_key(action: String) -> String:
 
 func _build_frames() -> void:
 	var frames := SpriteFrames.new()
-	_add_sheet_animation(frames, "down_idle", "res://asserts/third_party/Top-Down_Roguelike_Game_Kit_Pixel_Art/3 Dungeon Enemies/4/D_Idle.png")
-	_add_sheet_animation(frames, "down_walk", "res://asserts/third_party/Top-Down_Roguelike_Game_Kit_Pixel_Art/3 Dungeon Enemies/4/D_Walk.png")
-	_add_sheet_animation(frames, "down_attack", "res://asserts/third_party/Top-Down_Roguelike_Game_Kit_Pixel_Art/3 Dungeon Enemies/4/D_Attack.png")
-	_add_sheet_animation(frames, "down_hurt", "res://asserts/third_party/Top-Down_Roguelike_Game_Kit_Pixel_Art/3 Dungeon Enemies/4/D_Hurt.png")
-	_add_sheet_animation(frames, "down_death", "res://asserts/third_party/Top-Down_Roguelike_Game_Kit_Pixel_Art/3 Dungeon Enemies/4/D_Death.png")
-	_add_sheet_animation(frames, "side_idle", "res://asserts/third_party/Top-Down_Roguelike_Game_Kit_Pixel_Art/3 Dungeon Enemies/4/S_Idle.png")
-	_add_sheet_animation(frames, "side_walk", "res://asserts/third_party/Top-Down_Roguelike_Game_Kit_Pixel_Art/3 Dungeon Enemies/4/S_Walk.png")
-	_add_sheet_animation(frames, "side_attack", "res://asserts/third_party/Top-Down_Roguelike_Game_Kit_Pixel_Art/3 Dungeon Enemies/4/S_Attack.png")
-	_add_sheet_animation(frames, "side_hurt", "res://asserts/third_party/Top-Down_Roguelike_Game_Kit_Pixel_Art/3 Dungeon Enemies/4/S_Hurt.png")
-	_add_sheet_animation(frames, "side_death", "res://asserts/third_party/Top-Down_Roguelike_Game_Kit_Pixel_Art/3 Dungeon Enemies/4/S_Death.png")
-	_add_sheet_animation(frames, "up_idle", "res://asserts/third_party/Top-Down_Roguelike_Game_Kit_Pixel_Art/3 Dungeon Enemies/4/U_Idle.png")
-	_add_sheet_animation(frames, "up_walk", "res://asserts/third_party/Top-Down_Roguelike_Game_Kit_Pixel_Art/3 Dungeon Enemies/4/U_Walk.png")
-	_add_sheet_animation(frames, "up_attack", "res://asserts/third_party/Top-Down_Roguelike_Game_Kit_Pixel_Art/3 Dungeon Enemies/4/U_Attack.png")
-	_add_sheet_animation(frames, "up_hurt", "res://asserts/third_party/Top-Down_Roguelike_Game_Kit_Pixel_Art/3 Dungeon Enemies/4/U_Hurt.png")
-	_add_sheet_animation(frames, "up_death", "res://asserts/third_party/Top-Down_Roguelike_Game_Kit_Pixel_Art/3 Dungeon Enemies/4/U_Death.png")
+	var base_path := "res://asserts/third_party/Top-Down_Roguelike_Game_Kit_Pixel_Art/3 Dungeon Enemies/%s" % enemy_asset_id
+	_add_sheet_animation(frames, "down_idle", "%s/D_Idle.png" % base_path)
+	_add_sheet_animation(frames, "down_walk", "%s/D_Walk.png" % base_path)
+	_add_sheet_animation(frames, "down_attack", "%s/D_Attack.png" % base_path)
+	_add_sheet_animation(frames, "down_hurt", "%s/D_Hurt.png" % base_path)
+	_add_sheet_animation(frames, "down_death", "%s/D_Death.png" % base_path)
+	_add_sheet_animation(frames, "side_idle", "%s/S_Idle.png" % base_path)
+	_add_sheet_animation(frames, "side_walk", "%s/S_Walk.png" % base_path)
+	_add_sheet_animation(frames, "side_attack", "%s/S_Attack.png" % base_path)
+	_add_sheet_animation(frames, "side_hurt", "%s/S_Hurt.png" % base_path)
+	_add_sheet_animation(frames, "side_death", "%s/S_Death.png" % base_path)
+	_add_sheet_animation(frames, "up_idle", "%s/U_Idle.png" % base_path)
+	_add_sheet_animation(frames, "up_walk", "%s/U_Walk.png" % base_path)
+	_add_sheet_animation(frames, "up_attack", "%s/U_Attack.png" % base_path)
+	_add_sheet_animation(frames, "up_hurt", "%s/U_Hurt.png" % base_path)
+	_add_sheet_animation(frames, "up_death", "%s/U_Death.png" % base_path)
 	sprite.sprite_frames = frames
 
 

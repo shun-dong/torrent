@@ -68,12 +68,59 @@
 - [ ] 测试素材能覆盖主角、敌人、地块和基础 UI，不因缺美术阻塞开发
 - [ ] 不看外部说明也能理解移动、互动、攻击、弹反、雨眠
 
-## 本轮记录
+## 本周记录
 
-- 问题：仓库当前没有已提交的 `.gd` / `.tscn` 骨架，`project.godot` 也未配置 `run/main_scene`；`.godot/editor/project_metadata.cfg` 里记录过 `res://scenes/main/Main.tscn` 和 `res://autoload/game_state.gd`，但仓库中不存在对应文件。
-- 方案：本轮按俯视角原型方向重新补齐主入口、`GameState`、主菜单、HUD、测试战斗场、主角、`雨孢残骸`、交互点与雨眠存档闭环。
-- 方案：Godot CLI 未加入系统 `PATH`，测试改为显式使用 `C:\Users\liuSu\otherapps\Godot_v4.4.1-stable_win64.exe\Godot_v4.4.1-stable_win64.exe`。
-- 验证：已执行 `--headless --path C:\Users\liuSu\Projects\torrent --quit`、`--headless --path C:\Users\liuSu\Projects\torrent -d --quit-after 1`、`--headless --path C:\Users\liuSu\Projects\torrent -s res://scripts/validate_prototype.gd`，当前通过。
+### Wave 1 已完成
+
+**时间：** 2025-03-17
+
+**完成内容：**
+1. 修复了 EnemyBase 的类型推断错误（`var player: Node` → `var player: Node2D`）
+2. 搭建了基础游戏框架，包含：
+   - 主菜单系统（开始、继续、退出）
+   - 玩家四方向移动系统
+   - 短兵轻攻击与攻击判定
+   - 弹反系统（带方向检测）
+   - 受击/硬直/死亡状态机
+   - 体力消耗与恢复机制
+   - 基础 HUD（生命条、体力条、业显示）
+   - 雨眠存档点系统（恢复生命体力 + 记录存档点）
+   - 死亡后回到最近雨眠点
+   - 敌人基类 EnemyBase 和雨孢残骸实现
+
+### Wave 2 已完成
+
+**时间：** 2025-03-17
+
+**完成内容：**
+1. **地图切换系统**：
+   - 创建了 AreaPortal 组件（Area2D 触发器）
+   - 修改 Main.gd 支持多场景切换
+   - 场景间双向传送，带出生点记忆
+
+2. **三种敌人配置完成**：
+   - 雨孢残骸 (EN_G01)：素材4，HP 3，速度 40，可被弹反
+   - 雨虫群 (EN_G02)：素材2，HP 1，速度 20，不可弹反，爆裂伤害 2
+   - 湿壳拾荒鼠 (EN_G03)：素材3，HP 2，速度 70，可被打断
+
+3. **V01-S01 线性地图流程**：
+   - V01 采薇的家：起点，整理行装，出发
+   - V02 村路：教学区域，绕过障碍
+   - V03 村会场：山海回响剧情触发
+   - V04 村口：守卫对话，进入郊区
+   - G01 郊区入口：第一场战斗（雨孢残骸 x2）
+   - G02 排水沟：第二场战斗（雨虫群 x3）
+   - G03 废弃农道：第三场战斗（湿壳拾荒鼠 x2 + 雨孢残骸 x1）
+   - S01 避难所：雨眠存档点，安全区域
+
+4. **新游戏起始点**：从 V01 采薇的家开始
+
+**遗留问题：**
+- 敌人 AI 行为差异待细化（如雨虫群的爆裂、湿壳拾荒鼠的后撤）
+- 剧情演出效果较简单，待增强
+- 地图视觉效果较简陋，待美术迭代
+
+---
 
 ## 本周不做
 

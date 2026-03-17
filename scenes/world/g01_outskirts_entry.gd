@@ -5,15 +5,14 @@ const PLAYER_SCENE := preload("res://scenes/actors/Player.tscn")
 var player: Node
 
 @onready var hud: CanvasLayer = $HUD
-@onready var start_spawn: Marker2D = $SpawnPoints/StartSpawn
-@onready var shelter_spawn: Marker2D = $SpawnPoints/ShelterSpawn
-@onready var sign: Interactable = $Interactables/TutorialSign
-@onready var rainsleep: Interactable = $Interactables/RainSleepPoint
+@onready var v04_spawn: Marker2D = $SpawnPoints/V04Entrance
+@onready var g02_spawn: Marker2D = $SpawnPoints/G02Entrance
 
 
 func _ready() -> void:
-	sign.interacted.connect(_on_interactable)
-	rainsleep.interacted.connect(_on_interactable)
+	for interactable in $Interactables.get_children():
+		if interactable.has_signal("interacted"):
+			interactable.interacted.connect(_on_interactable)
 
 
 func initialize_arena(spawn_id: String) -> void:
@@ -25,25 +24,24 @@ func initialize_arena(spawn_id: String) -> void:
 	hud.bind_player(player)
 	player.apply_state(GameState.get_player_state())
 	player.global_position = _spawn_for_id(spawn_id).global_position
-	hud.show_status("旧猎刀已装备，按 J 攻击，按 L 弹反。")
+	hud.show_status("郊区入口。小心雨孢残骸，它们被活雨扭曲了。")
 
 
 func _spawn_for_id(spawn_id: String) -> Marker2D:
-	return shelter_spawn if spawn_id == "shelter" else start_spawn
+	match spawn_id:
+		"G01Entrance":
+			return g02_spawn
+		_:
+			return v04_spawn
 
 
 func _on_player_prompt_changed(text: String, is_visible: bool) -> void:
 	hud.set_prompt(text, is_visible)
 
 
-func _on_interactable(kind: String, checkpoint_id: String, message: String) -> void:
+func _on_interactable(kind: String, _checkpoint_id: String, message: String) -> void:
 	match kind:
 		"message":
-			hud.show_status(message)
-		"checkpoint":
-			player.restore_resources()
-			GameState.record_rainsleep(checkpoint_id, player.capture_state())
-			player.apply_state(GameState.get_player_state())
 			hud.show_status(message)
 		_:
 			hud.show_status(message)

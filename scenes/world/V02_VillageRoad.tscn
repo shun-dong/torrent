@@ -1,0 +1,118 @@
+[gd_scene load_steps=10 format=3 uid="uid://v02road00001"]
+
+[ext_resource type="Script" path="res://scenes/world/v02_village_road.gd" id="1_v02r"]
+[ext_resource type="PackedScene" path="res://scenes/ui/HUD.tscn" id="2_hud"]
+[ext_resource type="PackedScene" path="res://scenes/props/Interactable.tscn" id="3_interact"]
+[ext_resource type="PackedScene" path="res://scenes/props/AreaPortal.tscn" id="4_portal"]
+
+[sub_resource type="RectangleShape2D" id="1"]
+size = Vector2(320, 16)
+
+[sub_resource type="RectangleShape2D" id="2"]
+size = Vector2(16, 180)
+
+[sub_resource type="RectangleShape2D" id="3"]
+size = Vector2(24, 8)
+
+[sub_resource type="RectangleShape2D" id="4"]
+size = Vector2(48, 16)
+
+[sub_resource type="RectangleShape2D" id="5"]
+size = Vector2(32, 48)
+
+[node name="V02VillageRoad" type="Node2D"]
+script = ExtResource("1_v02r")
+
+[node name="Ground" type="Polygon2D" parent="."]
+color = Color(0.25, 0.3, 0.22, 1)
+polygon = PackedVector2Array(-160, -96, 160, -96, 160, 96, -160, 96)
+
+[node name="Path" type="Polygon2D" parent="."]
+color = Color(0.4, 0.42, 0.35, 1)
+polygon = PackedVector2Array(-140, -20, 140, -20, 140, 20, -140, 20)
+
+[node name="Walls" type="Node2D" parent="."]
+
+[node name="TopWall" type="StaticBody2D" parent="Walls"]
+position = Vector2(0, -104)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Walls/TopWall"]
+shape = SubResource("1")
+
+[node name="BottomWall" type="StaticBody2D" parent="Walls"]
+position = Vector2(0, 104)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Walls/BottomWall"]
+shape = SubResource("1")
+
+[node name="LeftWall" type="StaticBody2D" parent="Walls"]
+position = Vector2(-168, 0)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Walls/LeftWall"]
+shape = SubResource("2")
+
+[node name="RightWall" type="StaticBody2D" parent="Walls"]
+position = Vector2(168, 0)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Walls/RightWall"]
+shape = SubResource("2")
+
+[node name="Obstacle1" type="StaticBody2D" parent="Walls"]
+position = Vector2(-60, -50)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Walls/Obstacle1"]
+shape = SubResource("4")
+
+[node name="ObstacleVisual1" type="Polygon2D" parent="Walls/Obstacle1"]
+color = Color(0.3, 0.35, 0.28, 1)
+polygon = PackedVector2Array(-24, -8, 24, -8, 24, 8, -24, 8)
+
+[node name="Obstacle2" type="StaticBody2D" parent="Walls"]
+position = Vector2(80, 50)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Walls/Obstacle2"]
+shape = SubResource("5")
+
+[node name="ObstacleVisual2" type="Polygon2D" parent="Walls/Obstacle2"]
+color = Color(0.32, 0.28, 0.24, 1)
+polygon = PackedVector2Array(-16, -24, 16, -24, 16, 24, -16, 24)
+
+[node name="SpawnPoints" type="Node2D" parent="."]
+
+[node name="V01Entrance" type="Marker2D" parent="SpawnPoints"]
+position = Vector2(-100, 0)
+
+[node name="V03Entrance" type="Marker2D" parent="SpawnPoints"]
+position = Vector2(140, 0)
+
+[node name="Actors" type="Node2D" parent="."]
+
+[node name="Interactables" type="Node2D" parent="."]
+
+[node name="VillagerHint" parent="Interactables" instance=ExtResource("3_interact")]
+position = Vector2(-40, -70)
+prompt_text = "E 询问"
+interaction_message = "村民：'村会场就在前面，快去吧，山海的回响在等你。'"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Interactables/VillagerHint"]
+shape = SubResource("3")
+
+[node name="Portals" type="Node2D" parent="."]
+
+[node name="ToV01" parent="Portals" instance=ExtResource("4_portal")]
+position = Vector2(-150, 0)
+target_scene_path = "res://scenes/world/V01_Home.tscn"
+target_spawn_id = "V02Entrance"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Portals/ToV01"]
+shape = SubResource("3")
+
+[node name="ToV03" parent="Portals" instance=ExtResource("4_portal")]
+position = Vector2(150, 0)
+target_scene_path = "res://scenes/world/V03_VillageSquare.tscn"
+target_spawn_id = "V02Entrance"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Portals/ToV03"]
+shape = SubResource("3")
+
+[node name="HUD" parent="." instance=ExtResource("2_hud")]

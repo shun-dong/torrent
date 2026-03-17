@@ -29,6 +29,7 @@ var nearby_interactable: Interactable
 
 func _ready() -> void:
 	add_to_group("player")
+	print("[Player] Ready, collision layer: ", collision_layer)
 	health = max_health
 	stamina = max_stamina
 	_build_frames()
@@ -231,12 +232,18 @@ func _add_sheet_animation(frames: SpriteFrames, animation_name: String, texture_
 
 
 func _on_interaction_area_entered(area: Area2D) -> void:
+	print("[Player] Area entered: ", area.name, " class: ", area.get_class())
+	print("[Player] Area script: ", area.get_script())
 	if area is Interactable:
+		print("[Player] Is Interactable: ", area.prompt_text)
 		nearby_interactable = area
 		interaction_prompt_changed.emit(area.prompt_text, true)
+	else:
+		print("[Player] Not an Interactable")
 
 
 func _on_interaction_area_exited(area: Area2D) -> void:
+	print("[Player] Interaction area exited: ", area.name)
 	if area == nearby_interactable:
 		nearby_interactable = null
 		interaction_prompt_changed.emit("", false)
