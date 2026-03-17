@@ -35,8 +35,8 @@ func _spawn_for_id(spawn_id: String) -> Marker2D:
 			return g03_spawn
 
 
-func _on_player_prompt_changed(text: String, is_visible: bool) -> void:
-	hud.set_prompt(text, is_visible)
+func _on_player_prompt_changed(text: String, visible: bool) -> void:
+	hud.set_prompt(text, visible)
 
 
 func _on_interactable(kind: String, checkpoint_id: String, message: String) -> void:
@@ -53,8 +53,12 @@ func _on_interactable(kind: String, checkpoint_id: String, message: String) -> v
 
 
 func _on_player_died() -> void:
-	var restored_state := GameState.handle_player_death()
-	player.apply_state(restored_state)
-	player.global_position = _spawn_for_id(GameState.get_continue_spawn_id()).global_position
-	player.current_state = "idle"
-	hud.show_status("采薇在最近的雨眠点醒来。")
+	GameState.handle_player_death()
+	var main := get_tree().get_first_node_in_group("main")
+	if main != null and main.has_method("respawn_player"):
+		main.respawn_player()
+	else:
+		player.apply_state(GameState.get_player_state())
+		player.global_position = _spawn_for_id(GameState.get_continue_spawn_id()).global_position
+		player.current_state = "idle"
+		hud.show_status("采薇在最近的雨眠点醒来。")

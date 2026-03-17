@@ -129,6 +129,21 @@ func get_continue_spawn_id() -> String:
 	return recent_rainsleep_id
 
 
+func get_rainsleep_scene_id() -> String:
+	# Map rainsleep IDs to scene IDs
+	match recent_rainsleep_id:
+		"bed":
+			return "V01"
+		"V02", "V03Entrance":
+			return "V02"
+		"V04Entrance", "stage":
+			return "V03"
+		"S01":
+			return "S01"
+		_:
+			return current_scene_id
+
+
 func default_player_state() -> Dictionary:
 	return {
 		"health": 5,

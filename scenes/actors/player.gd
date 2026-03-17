@@ -98,7 +98,7 @@ func begin_attack() -> void:
 	current_state = "attack"
 	state_timer = 0.28
 	attack_resolved = false
-	sprite.flip_h = facing.x < 0.0
+	sprite.flip_h = facing.x > 0.0
 	sprite.play(_animation_key("attack"))
 
 
@@ -110,7 +110,7 @@ func begin_parry() -> bool:
 	stamina -= parry_cost
 	current_state = "parry"
 	state_timer = 0.22
-	sprite.flip_h = facing.x < 0.0
+	sprite.flip_h = facing.x > 0.0
 	sprite.play(_animation_key("hurt"))
 	return true
 
@@ -139,7 +139,7 @@ func receive_damage(amount: int, from_position: Vector2) -> void:
 	state_timer = 0.25
 	facing = (global_position - from_position).normalized()
 	facing_key = _facing_key_from_vector(facing)
-	sprite.flip_h = facing.x < 0.0
+	sprite.flip_h = facing.x > 0.0
 	sprite.play(_animation_key("hurt"))
 
 
@@ -184,7 +184,7 @@ func _animation_key(action: String) -> String:
 
 
 func _play_movement_animation(input_vector: Vector2) -> void:
-	sprite.flip_h = facing.x < 0.0
+	sprite.flip_h = facing.x > 0.0
 	if current_state == "attack" or current_state == "hurt" or current_state == "dead":
 		return
 	if input_vector == Vector2.ZERO:
@@ -220,7 +220,7 @@ func _build_frames() -> void:
 
 func _add_sheet_animation(frames: SpriteFrames, animation_name: String, texture_path: String) -> void:
 	var texture: Texture2D = load(texture_path)
-	var frame_count := int(texture.get_width() / FRAME_SIZE.x)
+	var frame_count := int(texture.get_width() / float(FRAME_SIZE.x))
 	frames.add_animation(animation_name)
 	frames.set_animation_loop(animation_name, animation_name.ends_with("idle") or animation_name.ends_with("walk"))
 	frames.set_animation_speed(animation_name, 10.0 if animation_name.ends_with("walk") else 8.0)

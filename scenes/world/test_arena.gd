@@ -32,8 +32,8 @@ func _spawn_for_id(spawn_id: String) -> Marker2D:
 	return shelter_spawn if spawn_id == "shelter" else start_spawn
 
 
-func _on_player_prompt_changed(text: String, is_visible: bool) -> void:
-	hud.set_prompt(text, is_visible)
+func _on_player_prompt_changed(text: String, visible: bool) -> void:
+	hud.set_prompt(text, visible)
 
 
 func _on_interactable(kind: String, checkpoint_id: String, message: String) -> void:

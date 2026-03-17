@@ -20,6 +20,7 @@ var in_pause_menu := false
 
 func _ready() -> void:
 	print("[Main] Main scene ready")
+	add_to_group("main")
 	menu = MAIN_MENU_SCENE.instantiate()
 	add_child(menu)
 	menu.start_requested.connect(_on_start_requested)
@@ -54,6 +55,22 @@ func _on_continue_requested() -> void:
 
 func _on_exit_requested() -> void:
 	get_tree().quit()
+
+
+func respawn_player() -> void:
+	print("[Main] Respawning player at rainsleep point: ", GameState.recent_rainsleep_id)
+	# Get the scene ID for the rainsleep point
+	var respawn_scene_id := GameState.get_rainsleep_scene_id()
+	print("[Main] Respawn scene ID: ", respawn_scene_id)
+
+	if respawn_scene_id != GameState.current_scene_id:
+		# Need to switch scenes
+		GameState.current_scene_id = respawn_scene_id
+		call_deferred("_load_arena", GameState.recent_rainsleep_id)
+	else:
+		# Same scene, just reposition player
+		if current_arena != null and current_arena.has_method("initialize_arena"):
+			current_arena.initialize_arena(GameState.recent_rainsleep_id)
 
 
 func _load_arena(spawn_id: String) -> void:

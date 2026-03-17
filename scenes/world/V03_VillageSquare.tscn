@@ -31,6 +31,11 @@ polygon = PackedVector2Array(-160, -96, 160, -96, 160, 96, -160, 96)
 color = Color(0.4, 0.38, 0.34, 1)
 polygon = PackedVector2Array(-60, -40, 60, -40, 60, 20, -60, 20)
 
+[node name="Silhouette" type="Sprite2D" parent="."]
+visible = false
+position = Vector2(140, 0)
+modulate = Color(0.3, 0.3, 0.4, 0.6)
+
 [node name="Walls" type="Node2D" parent="."]
 
 [node name="TopWall" type="StaticBody2D" parent="Walls"]

@@ -48,7 +48,7 @@ func _physics_process(delta: float) -> void:
 		current_state = "idle"
 	if current_state == "windup":
 		velocity = Vector2.ZERO
-		sprite.flip_h = facing.x < 0.0
+		sprite.flip_h = facing.x > 0.0
 		sprite.play(_animation_key("attack"))
 		if state_timer <= 0.0:
 			current_state = "attack"
@@ -69,12 +69,12 @@ func _physics_process(delta: float) -> void:
 		elif to_player.length() <= detection_radius:
 			current_state = "move"
 			velocity = to_player.normalized() * move_speed
-			sprite.flip_h = facing.x < 0.0
+			sprite.flip_h = facing.x > 0.0
 			sprite.play(_animation_key("walk"))
 		else:
 			current_state = "idle"
 			velocity = Vector2.ZERO
-			sprite.flip_h = facing.x < 0.0
+			sprite.flip_h = facing.x > 0.0
 			sprite.play(_animation_key("idle"))
 	move_and_slide()
 
@@ -90,14 +90,14 @@ func receive_hit(amount: int, from_position: Vector2) -> void:
 	facing_key = _facing_key_from_vector(facing)
 	current_state = "hurt"
 	state_timer = 0.3
-	sprite.flip_h = facing.x < 0.0
+	sprite.flip_h = facing.x > 0.0
 	sprite.play(_animation_key("hurt"))
 
 
 func on_parried() -> void:
 	current_state = "stagger"
 	state_timer = 0.6
-	sprite.flip_h = facing.x < 0.0
+	sprite.flip_h = facing.x > 0.0
 	sprite.play(_animation_key("hurt"))
 
 
@@ -116,7 +116,7 @@ func _resolve_attack() -> void:
 func _die() -> void:
 	current_state = "dead"
 	velocity = Vector2.ZERO
-	sprite.flip_h = facing.x < 0.0
+	sprite.flip_h = facing.x > 0.0
 	sprite.play(_animation_key("death"))
 	GameState.add_karma(1)
 	defeated.emit(enemy_id)
@@ -158,7 +158,7 @@ func _build_frames() -> void:
 
 func _add_sheet_animation(frames: SpriteFrames, animation_name: String, texture_path: String) -> void:
 	var texture: Texture2D = load(texture_path)
-	var frame_count := int(texture.get_width() / FRAME_SIZE.x)
+	var frame_count := int(texture.get_width() / float(FRAME_SIZE.x))
 	frames.add_animation(animation_name)
 	frames.set_animation_loop(animation_name, animation_name.ends_with("idle") or animation_name.ends_with("walk"))
 	frames.set_animation_speed(animation_name, 8.0)
