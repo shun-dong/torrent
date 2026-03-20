@@ -1,11 +1,5 @@
-extends Node2D
+extends RoomBase
 
-const PLAYER_SCENE := preload("res://scenes/actors/Player.tscn")
-
-var player: Node
-var opening_played := false
-
-@onready var hud: CanvasLayer = $HUD
 @onready var bed_spawn: Marker2D = $SpawnPoints/BedSpawn
 @onready var v02_spawn: Marker2D = $SpawnPoints/V02Spawn
 @onready var opening_cutscene: CanvasLayer = $OpeningCutscene
@@ -13,130 +7,128 @@ var opening_played := false
 @onready var intro_label: Label = $OpeningCutscene/IntroLabel
 @onready var wake_label: Label = $OpeningCutscene/WakeLabel
 
+var _opening_played := false
 
 func _ready() -> void:
-	print("[V01_Home] Ready, connecting interactables...")
-	for interactable in $Interactables.get_children():
-		print("[V01_Home] Found interactable: ", interactable.name)
-		if interactable.has_signal("interacted"):
-			interactable.interacted.connect(_on_interactable)
-			print("[V01_Home] Connected signal for: ", interactable.name)
-
+	room_id = "V01"
+	super._ready()
+	print("[V01_Home] Ready")
 
 func initialize_arena(spawn_id: String) -> void:
 	print("[V01_Home] Initializing arena with spawn_id: ", spawn_id)
 
 	# Check if we should play opening cutscene (new game, coming from bed)
-	if spawn_id == "bed" and not opening_played:
+	if spawn_id == "bed" and not _opening_played:
 		_play_opening_cutscene()
 	else:
-		_setup_player(spawn_id)
-		hud.show_status("永宁村，采薇的家。去村会场找山海的回响。")
+		_cleanup_player()
+		_spawn_player(spawn_id)
+		hud.show_status(room_status_text)
+		EventManager.on_room_initialized(room_id, spawn_id)
 
+func _get_spawn_position(spawn_id: String) -> Vector2:
+	match spawn_id:
+		"V02Entrance", "from_V02":
+			return v02_spawn.global_position
+		"bed", "start", _:
+			return bed_spawn.global_position
 
-func _setup_player(spawn_id: String) -> void:
-	# Disconnect existing signals and remove old player to prevent issues
-	if player != null and is_instance_valid(player):
-		if player.died.is_connected(_on_player_died):
-			player.died.disconnect(_on_player_died)
-		if player.interaction_prompt_changed.is_connected(_on_player_prompt_changed):
-			player.interaction_prompt_changed.disconnect(_on_player_prompt_changed)
-		player.queue_free()
-		player = null
+func _handle_interactable_default(kind: String, checkpoint_id: String, message: String) -> void:
+	match kind:
+		"message":
+			hud.show_status(message)
+		"portal":
+			hud.show_status(message)
+			await get_tree().create_timer(0.5).timeout
+			_trigger_portal(checkpoint_id)
+		_:
+			hud.show_status(message)
 
-	player = PLAYER_SCENE.instantiate()
-	$Actors.add_child(player)
-	player.died.connect(_on_player_died)
-	player.interaction_prompt_changed.connect(_on_player_prompt_changed)
-	print("[V01_Home] Player created")
-	hud.bind_player(player)
-	player.apply_state(GameState.get_player_state())
-	player.global_position = _spawn_for_id(spawn_id).global_position
-	print("[V01_Home] Player spawned at: ", player.global_position)
-
+func play_cg_event(config: Dictionary, on_complete: Callable) -> void:
+	var cg_type: String = config.get("cg_type", "")
+	if cg_type == "opening":
+		_play_opening_cg(config, on_complete)
+	else:
+		on_complete.call()
 
 func _play_opening_cutscene() -> void:
-	opening_played = true
+	# Legacy opening - will be called by EventManager via play_cg_event
+	_opening_played = true
 	opening_cutscene.visible = true
 	intro_label.modulate = Color(1, 1, 1, 0)
 	wake_label.modulate = Color(1, 1, 1, 0)
 
-	# Setup player but keep hidden initially
-	_setup_player("bed")
+	_cleanup_player()
+	_spawn_player("bed")
 	player.visible = false
 	hud.visible = false
 
-	# Sequence: fade in "清洗...活雨..."
 	var tween := create_tween()
 	tween.tween_property(intro_label, "modulate", Color(1, 1, 1, 1), 2.0)
 	tween.tween_interval(2.0)
 	tween.tween_property(intro_label, "modulate", Color(1, 1, 1, 0), 1.0)
-
-	# Then fade in "采薇，醒来..."
 	tween.tween_callback(func():
 		intro_label.visible = false
 		wake_label.visible = true
 	)
 	tween.tween_property(wake_label, "modulate", Color(1, 1, 1, 1), 1.5)
 	tween.tween_interval(2.0)
-
-	# Fade out black screen and show player
 	tween.tween_property(black_screen, "modulate", Color(0, 0, 0, 0), 2.0)
 	tween.tween_callback(func():
 		opening_cutscene.visible = false
 		player.visible = true
 		hud.visible = true
-		hud.show_status("永宁村，采薇的家。去村会场找山海的回响。")
+		hud.show_status(room_status_text)
+		EventManager.trigger_event_by_id("EV_V002")
 	)
 
+func _play_opening_cg(config: Dictionary, on_complete: Callable) -> void:
+	_opening_played = true
+	opening_cutscene.visible = true
+	intro_label.modulate = Color(1, 1, 1, 0)
+	wake_label.modulate = Color(1, 1, 1, 0)
 
-func _spawn_for_id(spawn_id: String) -> Marker2D:
-	match spawn_id:
-		"V02Entrance", "from_V02":
-			return v02_spawn
-		"bed", "start", _:
-			return bed_spawn
+	_cleanup_player()
+	_spawn_player("bed")
+	player.visible = false
+	hud.visible = false
 
+	var steps: Array = config.get("steps", [])
+	var tween := create_tween()
 
-func _on_player_prompt_changed(text: String, is_visible: bool) -> void:
-	hud.set_prompt(text, is_visible)
+	for step in steps:
+		var step_type: String = step.get("type", "")
+		match step_type:
+			"fade_in":
+				var target_name: String = step.get("target", "")
+				var duration: float = step.get("duration", 1.0)
+				var text: String = step.get("text", "")
+				var wait: float = step.get("wait", 0.0)
+				var target = _get_target(target_name)
+				if target is Label and not text.is_empty():
+					target.text = text
+				if target:
+					tween.tween_property(target, "modulate", Color(1, 1, 1, 1), duration)
+				if wait > 0:
+					tween.tween_interval(wait)
+			"fade_out":
+				var target_name: String = step.get("target", "")
+				var duration: float = step.get("duration", 1.0)
+				var target = _get_target(target_name)
+				if target:
+					tween.tween_property(target, "modulate", Color(1, 1, 1, 0), duration)
 
+	tween.tween_callback(func():
+		opening_cutscene.visible = false
+		player.visible = true
+		hud.visible = true
+		hud.show_status(room_status_text)
+		on_complete.call()
+	)
 
-func _on_interactable(kind: String, checkpoint_id: String, message: String) -> void:
-	match kind:
-		"message":
-			hud.show_status(message)
-		"portal":
-			hud.show_status(message)
-			# Trigger portal transition
-			await get_tree().create_timer(0.5).timeout
-			_go_through_portal(checkpoint_id)
-		_:
-			hud.show_status(message)
-
-
-func _go_through_portal(target_scene: String) -> void:
-	print("[V01_Home] Going through portal to: ", target_scene)
-	# Find the portal and trigger it
-	for portal in $Portals.get_children():
-		# Check if it's an AreaPortal by checking the script or method
-		if portal.has_signal("portal_triggered"):
-			print("[V01_Home] Checking portal: ", portal.name, " -> ", portal.target_scene_path)
-			if target_scene in portal.target_scene_path:
-				print("[V01_Home] Triggering portal: ", portal.name)
-				# Disable monitoring to prevent player body from triggering it again
-				portal.monitoring = false
-				portal.portal_triggered.emit(portal.target_scene_path, portal.target_spawn_id)
-				return
-
-
-func _on_player_died() -> void:
-	GameState.handle_player_death()
-	# Find Main scene and trigger respawn
-	var main := get_tree().get_first_node_in_group("main")
-	if main != null and main.has_method("respawn_player"):
-		main.respawn_player()
-	else:
-		# Fallback: local respawn with proper player recreation
-		_setup_player(GameState.recent_rainsleep_id)
-		hud.show_status("采薇在最近的雨眠点醒来。")
+func _get_target(target_name: String) -> Node:
+	match target_name:
+		"black_screen": return black_screen
+		"intro_label": return intro_label
+		"wake_label": return wake_label
+		_: return null

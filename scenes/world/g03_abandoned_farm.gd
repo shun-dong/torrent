@@ -1,119 +1,60 @@
-extends Node2D
+extends RoomBase
 
-const PLAYER_SCENE := preload("res://scenes/actors/Player.tscn")
-
-var player: Node
-var enemies_remaining := 0
-var shadow_event_triggered := false
-
-@onready var hud: CanvasLayer = $HUD
 @onready var g02_spawn: Marker2D = $SpawnPoints/G02Entrance
 @onready var s01_spawn: Marker2D = $SpawnPoints/S01Entrance
 @onready var shadow_figure: Sprite2D = $ShadowFigure
 
-
 func _ready() -> void:
-	for interactable in $Interactables.get_children():
-		if interactable.has_signal("interacted"):
-			interactable.interacted.connect(_on_interactable)
+	room_id = "G03"
+	super._ready()
 
+func _on_arena_initialized(_spawn_id: String) -> void:
+	# Connect enemy defeated signals for this room
+	for actor in actors.get_children():
+		if actor.is_in_group("enemies"):
+			if actor.has_signal("defeated") and not actor.defeated.is_connected(_on_enemy_defeated):
+				actor.defeated.connect(_on_enemy_defeated)
+	hud.show_status(room_status_text)
 
-func initialize_arena(spawn_id: String) -> void:
-	# Disconnect existing signals to prevent double-connection on respawn
-	if player != null and is_instance_valid(player):
-		if player.died.is_connected(_on_player_died):
-			player.died.disconnect(_on_player_died)
-		if player.interaction_prompt_changed.is_connected(_on_player_prompt_changed):
-			player.interaction_prompt_changed.disconnect(_on_player_prompt_changed)
-		player.queue_free()
-		player = null
-
-	player = PLAYER_SCENE.instantiate()
-	$Actors.add_child(player)
-	player.died.connect(_on_player_died)
-	player.interaction_prompt_changed.connect(_on_player_prompt_changed)
-	hud.bind_player(player)
-	player.apply_state(GameState.get_player_state())
-	player.global_position = _spawn_for_id(spawn_id).global_position
-
-	# Connect to enemy defeat signals
-	enemies_remaining = 0
-	for enemy in $Actors.get_children():
-		if enemy.is_in_group("enemies"):
-			enemies_remaining += 1
-			if not enemy.defeated.is_connected(_on_enemy_defeated):
-				enemy.defeated.connect(_on_enemy_defeated)
-
-	hud.show_status("废弃农道。湿壳拾荒鼠在此徘徊，前面就是避难所。")
-
-
-func _on_enemy_defeated(_enemy_id: String) -> void:
-	enemies_remaining -= 1
-	if enemies_remaining <= 0 and not shadow_event_triggered:
-		_trigger_shadow_event()
-
-
-func _spawn_for_id(spawn_id: String) -> Marker2D:
+func _get_spawn_position(spawn_id: String) -> Vector2:
 	match spawn_id:
 		"G02Entrance", "from_G02":
-			return g02_spawn
+			return g02_spawn.global_position
 		"S01Entrance", "from_S01", "S01":
-			return s01_spawn
+			return s01_spawn.global_position
 		_:
-			return g02_spawn
+			return g02_spawn.global_position
 
+func play_cg_event(config: Dictionary, on_complete: Callable) -> void:
+	var cg_type: String = config.get("cg_type", "")
+	if cg_type == "shadow_appears":
+		_play_shadow_event(config, on_complete)
+	else:
+		on_complete.call()
 
-func _on_player_prompt_changed(text: String, is_visible: bool) -> void:
-	hud.set_prompt(text, is_visible)
-
-
-func _on_interactable(kind: String, _checkpoint_id: String, message: String) -> void:
-	match kind:
-		"message":
-			hud.show_status(message)
-		_:
-			hud.show_status(message)
-
-
-func _trigger_shadow_event() -> void:
-	shadow_event_triggered = true
+func _play_shadow_event(config: Dictionary, on_complete: Callable) -> void:
 	hud.show_status("影隐：'...采薇...'（远处的身影消失了）")
 
-	# Show shadow figure with fade in
 	shadow_figure.visible = true
 	shadow_figure.modulate = Color(0.8, 0.8, 0.9, 0)
 
+	var steps: Array = config.get("steps", [])
 	var tween := create_tween()
-	tween.tween_property(shadow_figure, "modulate", Color(0.8, 0.8, 0.9, 0.7), 1.0)
-	tween.tween_interval(2.0)
-	tween.tween_property(shadow_figure, "modulate", Color(0.8, 0.8, 0.9, 0), 1.5)
+
+	for step in steps:
+		var step_type: String = step.get("type", "")
+		match step_type:
+			"show_sprite":
+				var fade_in: float = step.get("fade_in", 1.0)
+				tween.tween_property(shadow_figure, "modulate", Color(0.8, 0.8, 0.9, 0.7), fade_in)
+			"wait":
+				var duration: float = step.get("duration", 1.0)
+				tween.tween_interval(duration)
+			"fade_out":
+				var duration: float = step.get("duration", 1.0)
+				tween.tween_property(shadow_figure, "modulate", Color(0.8, 0.8, 0.9, 0), duration)
+
 	tween.tween_callback(func():
 		shadow_figure.visible = false
+		on_complete.call()
 	)
-
-
-func _on_player_died() -> void:
-	GameState.handle_player_death()
-	var main := get_tree().get_first_node_in_group("main")
-	if main != null and main.has_method("respawn_player"):
-		main.respawn_player()
-	else:
-		call_deferred("_respawn_player_local")
-
-
-func _respawn_player_local() -> void:
-	if player != null and is_instance_valid(player):
-		if player.died.is_connected(_on_player_died):
-			player.died.disconnect(_on_player_died)
-		if player.interaction_prompt_changed.is_connected(_on_player_prompt_changed):
-			player.interaction_prompt_changed.disconnect(_on_player_prompt_changed)
-		player.queue_free()
-	player = PLAYER_SCENE.instantiate()
-	$Actors.add_child(player)
-	player.died.connect(_on_player_died)
-	player.interaction_prompt_changed.connect(_on_player_prompt_changed)
-	hud.bind_player(player)
-	player.apply_state(GameState.get_player_state())
-	player.global_position = _spawn_for_id(GameState.recent_rainsleep_id).global_position
-	player.current_state = "idle"
-	hud.show_status("采薇在最近的雨眠点醒来。")

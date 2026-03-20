@@ -8,6 +8,8 @@ const DATA_FILES := {
 	"operations": "res://data/operation.csv",
 	"enemies": "res://data/enemy.csv",
 	"items": "res://data/item.csv",
+	"events": "res://data/event.csv",
+	"rooms": "res://data/room.csv",
 }
 
 var design_data: Dictionary = {}
