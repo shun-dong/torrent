@@ -22,10 +22,14 @@ func _on_body_entered(body: Node2D) -> void:
 	if not body.is_in_group("player"):
 		return
 
-	# 触发传送
-	portal_triggered.emit(target_scene_path, target_spawn_id)
+	# 触发传送 - 使用 call_deferred 避免 physics 查询冲突
+	call_deferred("_emit_portal_triggered")
 
 	# 进入冷却
 	just_triggered = true
 	await get_tree().create_timer(cooldown).timeout
 	just_triggered = false
+
+
+func _emit_portal_triggered() -> void:
+	portal_triggered.emit(target_scene_path, target_spawn_id)

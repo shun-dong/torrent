@@ -10,7 +10,6 @@ enum EventState {
 	COMPLETED,
 }
 
-var _event_states: Dictionary = {}
 var _completed_events: Array = []
 var _room_events: Dictionary = {}
 var _active_rooms: Dictionary = {}

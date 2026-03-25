@@ -96,8 +96,8 @@ func _get_spawn_position(spawn_id: String) -> Vector2:
 		return _spawn_markers.values()[0].global_position
 	return Vector2.ZERO
 
-func _on_player_prompt_changed(text: String, is_visible: bool) -> void:
-	hud.set_prompt(text, is_visible)
+func _on_player_prompt_changed(text: String, visible_flag: bool) -> void:
+	hud.set_prompt(text, visible_flag)
 
 func _on_interactable(kind: String, checkpoint_id: String, message: String) -> void:
 	var was_handled := EventManager.on_interactable_triggered(room_id, kind, checkpoint_id, message)
@@ -150,7 +150,7 @@ func spawn_enemies(enemy_config: Array) -> void:
 		var pos: Dictionary = enemy_data.get("position", {})
 		_spawn_enemy_at(enemy_id, Vector2(pos.get("x", 0), pos.get("y", 0)))
 
-func _spawn_enemy_at(enemy_id: String, position: Vector2) -> void:
+func _spawn_enemy_at(enemy_id: String, spawn_position: Vector2) -> void:
 	var enemy_scene: PackedScene
 	match enemy_id:
 		"EN_G01":
@@ -163,7 +163,7 @@ func _spawn_enemy_at(enemy_id: String, position: Vector2) -> void:
 			enemy_scene = RAIN_SPORE_SCENE
 
 	var enemy = enemy_scene.instantiate()
-	enemy.global_position = position
+	enemy.global_position = spawn_position
 	actors.add_child(enemy)
 
 	if enemy.has_signal("defeated"):

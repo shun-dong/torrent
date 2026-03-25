@@ -13,15 +13,3 @@ func _get_spawn_position(spawn_id: String) -> Vector2:
 			return shelter_spawn.global_position
 		_:
 			return g03_spawn.global_position
-
-func _handle_interactable_default(kind: String, checkpoint_id: String, message: String) -> void:
-	match kind:
-		"message":
-			hud.show_status(message)
-		"checkpoint":
-			# S01 uses "S01" as rainsleep ID
-			GameState.record_rainsleep("S01", player.capture_state())
-			player.apply_state(GameState.get_player_state())
-			hud.show_status(message)
-		_:
-			hud.show_status(message)
