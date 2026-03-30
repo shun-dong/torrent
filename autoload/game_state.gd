@@ -138,18 +138,26 @@ func get_continue_spawn_id() -> String:
 
 
 func get_rainsleep_scene_id() -> String:
-	# Map rainsleep IDs to scene IDs
-	match recent_rainsleep_id:
-		"bed":
-			return "V01"
-		"V02", "V03Entrance":
-			return "V02"
-		"V04Entrance", "stage":
-			return "V03"
-		"S01":
-			return "S01"
-		_:
-			return current_scene_id
+	# Map rainsleep checkpoint IDs to scene IDs
+	# First check if the rainsleep_id matches a scene ID directly (e.g., "S01" -> "S01")
+	var rooms: Dictionary = design_data.get("rooms", {})
+	if rooms.has(recent_rainsleep_id):
+		return recent_rainsleep_id
+
+	# Otherwise, find which room contains this spawn point
+	for room_id: String in rooms.keys():
+		var room_data: Dictionary = rooms[room_id]
+		var spawn_id: String = room_data.get("default_spawn", "")
+		if spawn_id == recent_rainsleep_id:
+			return room_id
+
+	# Fallback: try to infer from naming convention (e.g., "V02Entrance" -> "V02")
+	for room_id: String in rooms.keys():
+		if recent_rainsleep_id.begins_with(room_id):
+			return room_id
+
+	# Final fallback: return current scene
+	return current_scene_id
 
 
 func default_player_state() -> Dictionary:

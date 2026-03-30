@@ -183,7 +183,30 @@
 - 连线双向绘制，避免重复
 - `process_mode = PROCESS_MODE_ALWAYS` 确保地图在暂停时仍可处理
 
-### Wave 2B 规划中
+### Wave 2B 已完成
+
+**时间：** 2026-03-31
+
+**完成内容：**
+
+1. **业力系统重构 (dev/karma)**：
+   - 将单一 `karma` 拆分为 **临时业(karma_temp)** 和 **永久业(karma_perm)**
+   - 添加阈值机制：`KARMA_THRESHOLD = 5`，超过 5 点的临时业在存档时转为永久业
+   - `enemy.csv` 新增 `karma` 列，不同敌人提供不同业力值（雨孢残骸=2，雨虫群=1，湿壳拾荒鼠=3）
+   - `GameState.add_karma_temp()` 和 `commit_karma()` 方法实现
+   - HUD 更新显示："临时业 X | 永久业 Y | 精神 Z"
+   - 击杀敌人时使用 `get_enemy_karma()` 从 CSV 获取业力值
+
+2. **死亡重生逻辑修复**：
+   - 重构 `get_rainsleep_scene_id()`，从硬编码改为动态查找
+   - 通过 `room.csv` 的 `default_spawn` 字段反向查找场景 ID
+   - 修复死亡后重生到当前房间而非存档点的问题
+
+3. **代码质量修复**：
+   - 修复 `map_ui.gd` 第 125 行 `offset` 变量与 `CanvasLayer` 基类属性冲突
+   - 将 `offset` 重命名为 `centering_offset`，消除编译警告
+
+### Wave 2C 规划中
 
 **开发状态：** 等待开始
 

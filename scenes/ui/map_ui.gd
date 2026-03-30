@@ -122,8 +122,8 @@ func _calculate_center_offset(bounds: Rect2i) -> Vector2:
 
 	var panel_size := map_panel.size - MAP_OFFSET * 2
 	var map_size := Vector2(bounds.size.x * ROOM_SPACING, bounds.size.y * ROOM_SPACING)
-	var offset := (panel_size - map_size) / 2
-	return offset + MAP_OFFSET
+	var centering_offset := (panel_size - map_size) / 2
+	return centering_offset + MAP_OFFSET
 
 
 ## 绘制房间节点
