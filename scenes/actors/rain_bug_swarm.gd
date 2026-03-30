@@ -87,7 +87,8 @@ func _explode() -> void:
 	sprite.modulate = Color.WHITE
 	# Self-destruct
 	current_state = "dead"
-	GameState.add_karma(1)
+	var karma_value := GameState.get_enemy_karma(enemy_id)
+	GameState.add_karma_temp(karma_value)
 	defeated.emit(enemy_id)
 	set_physics_process(false)
 	queue_free()
@@ -107,7 +108,8 @@ func _die() -> void:
 	sprite.modulate = Color.WHITE
 	sprite.flip_h = facing.x > 0.0
 	sprite.play(_animation_key("death"))
-	GameState.add_karma(1)
+	var karma_value := GameState.get_enemy_karma(enemy_id)
+	GameState.add_karma_temp(karma_value)
 	defeated.emit(enemy_id)
 	set_physics_process(false)
 	await get_tree().create_timer(0.35).timeout
