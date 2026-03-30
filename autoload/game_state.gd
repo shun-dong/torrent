@@ -47,6 +47,7 @@ func ensure_input_map() -> void:
 		"pause": [KEY_ESCAPE],
 		"light_attack": [KEY_J],
 		"parry": [KEY_L],
+		"toggle_map": [KEY_M],
 	}
 	for action in bindings.keys():
 		if not InputMap.has_action(action):

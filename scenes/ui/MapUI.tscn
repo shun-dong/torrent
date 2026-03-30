@@ -1,0 +1,38 @@
+[gd_scene load_steps=2 format=3 uid="uid://c7qtnvg78qw1c"]
+
+[ext_resource type="Script" path="res://scenes/ui/map_ui.gd" id="1_mapui"]
+
+[node name="MapUI" type="CanvasLayer"]
+visible = true
+layer = 10
+script = ExtResource("1_mapui")
+
+[node name="MapPanel" type="Panel" parent="."]
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -220.0
+offset_top = 20.0
+offset_right = -20.0
+offset_bottom = 280.0
+grow_horizontal = 0
+
+[node name="TitleLabel" type="Label" parent="MapPanel"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_top = 8.0
+offset_bottom = 31.0
+grow_horizontal = 2
+theme_override_font_sizes/font_size = 16
+text = "地图"
+horizontal_alignment = 1
+
+[node name="MapContainer" type="Control" parent="MapPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = 32.0
+grow_horizontal = 2
+grow_vertical = 2

@@ -2,6 +2,7 @@ extends Node
 
 const MAIN_MENU_SCENE := preload("res://scenes/ui/MainMenu.tscn")
 const DEBUG_MANAGER_SCENE := preload("res://scenes/debug/DebugManager.tscn")
+const MAP_UI_SCENE := preload("res://scenes/ui/MapUI.tscn")
 const SCENE_PATHS := {
 	"V01": "res://scenes/world/V01_Home.tscn",
 	"V02": "res://scenes/world/V02_VillageRoad.tscn",
@@ -18,6 +19,7 @@ var menu: Control
 var current_arena: Node
 var in_pause_menu := false
 var debug_manager: CanvasLayer
+var map_ui: CanvasLayer
 
 
 func _ready() -> void:
@@ -27,6 +29,12 @@ func _ready() -> void:
 	# Initialize debug manager
 	debug_manager = DEBUG_MANAGER_SCENE.instantiate()
 	add_child(debug_manager)
+
+	# Initialize map UI
+	map_ui = MAP_UI_SCENE.instantiate()
+	add_child(map_ui)
+	# Map will be shown when arena is loaded
+	map_ui.hide_map()
 
 	menu = MAIN_MENU_SCENE.instantiate()
 	add_child(menu)
@@ -40,6 +48,11 @@ func _ready() -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	# Don't process pause if debug menu is visible
 	if debug_manager != null and debug_manager.teleport_menu_visible:
+		return
+	if event.is_action_pressed("toggle_map") and current_arena != null:
+		if map_ui != null:
+			map_ui.toggle_map()
+		get_viewport().set_input_as_handled()
 		return
 	if event.is_action_pressed("pause") and current_arena != null:
 		if menu.visible:
@@ -81,6 +94,9 @@ func respawn_player() -> void:
 		# Same scene, just reposition and reset player
 		if current_arena != null and current_arena.has_method("initialize_arena"):
 			current_arena.initialize_arena(GameState.recent_rainsleep_id)
+		# Refresh map after respawn
+		if map_ui != null and map_ui.is_map_visible():
+			map_ui.update_current_room()
 
 
 func _load_arena(spawn_id: String) -> void:
@@ -112,6 +128,9 @@ func _load_arena(spawn_id: String) -> void:
 		current_arena.initialize_arena(spawn_id)
 	_refresh_menu()
 	menu.hide()
+	# Show map when entering game
+	if map_ui != null:
+		map_ui.show_map()
 
 
 func _connect_portals(arena: Node) -> void:
@@ -135,6 +154,9 @@ func _on_portal_triggered(target_path: String, spawn_id: String) -> void:
 			break
 	# Load arena immediately for smoother transition
 	_load_arena(spawn_id)
+	# Refresh map if it's visible (after scene change)
+	if map_ui != null and map_ui.is_map_visible():
+		map_ui.update_current_room()
 
 
 func _show_pause_menu() -> void:
@@ -158,3 +180,9 @@ func _refresh_menu() -> void:
 	var can_resume := current_arena != null
 	if menu.has_method("set_menu_state"):
 		menu.set_menu_state(has_save, can_resume, in_pause_menu)
+
+
+## 刷新地图（供外部调用）
+func refresh_map() -> void:
+	if map_ui != null and map_ui.is_map_visible():
+		map_ui.update_current_room()

@@ -26,6 +26,13 @@ func _ready() -> void:
 	_connect_interactables()
 	_initialized = true
 	EventManager.register_room(self)
+	# Notify MapManager of current room
+	if not room_id.is_empty():
+		MapManager.set_current_room(room_id)
+		# Refresh map if visible
+		var main := get_tree().get_first_node_in_group("main")
+		if main != null and main.has_method("refresh_map"):
+			main.refresh_map()
 
 func _load_room_config() -> void:
 	if room_id.is_empty():
