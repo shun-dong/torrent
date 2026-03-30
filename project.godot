@@ -23,6 +23,7 @@ config/icon="res://icon.svg"
 
 GameState="*res://autoload/game_state.gd"
 EventManager="*res://autoload/event_manager.gd"
+MapManager="*res://autoload/map_manager.gd"
 
 [rendering]
 
