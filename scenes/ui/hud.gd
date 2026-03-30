@@ -25,7 +25,11 @@ func show_status(text: String) -> void:
 
 func _process(_delta: float) -> void:
 	_update_bars()
-	status_label.text = "业 %d  |  精神 %d" % [GameState.karma, int(GameState.current_player_state.get("spirit", 0))]
+	status_label.text = "临时业 %d  |  永久业 %d  |  精神 %d" % [
+		GameState.karma_temp,
+		GameState.karma_perm,
+		int(GameState.current_player_state.get("spirit", 0))
+	]
 
 
 func _update_bars() -> void:

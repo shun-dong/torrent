@@ -14,6 +14,8 @@ const DATA_FILES := {
 
 var design_data: Dictionary = {}
 var initial_equipment: Dictionary = {}
+const KARMA_THRESHOLD := 5
+
 var current_player_state := {
 	"health": 5,
 	"max_health": 5,
@@ -21,7 +23,8 @@ var current_player_state := {
 	"max_stamina": 100.0,
 	"spirit": 0,
 }
-var karma: int = 0
+var karma_temp: int = 0
+var karma_perm: int = 0
 var recent_rainsleep_id := "start"
 var current_scene_id := "test_arena"
 var runtime_active := false
@@ -100,7 +103,8 @@ func load_csv_dict(path: String) -> Dictionary:
 
 func new_game() -> void:
 	runtime_active = true
-	karma = 0
+	karma_temp = 0
+	karma_perm = 0
 	recent_rainsleep_id = "bed"
 	current_scene_id = "V01"
 	current_player_state = default_player_state()
@@ -114,7 +118,8 @@ func begin_continue() -> bool:
 	runtime_active = true
 	current_scene_id = String(save_data.get("scene_id", "test_arena"))
 	recent_rainsleep_id = String(save_data.get("recent_rainsleep_id", "start"))
-	karma = int(save_data.get("karma", 0))
+	karma_temp = int(save_data.get("karma_temp", 0))
+	karma_perm = int(save_data.get("karma_perm", 0))
 	var saved_state: Dictionary = save_data.get("player_state", {})
 	current_player_state = default_player_state()
 	for key in saved_state.keys():
@@ -169,13 +174,15 @@ func get_player_state() -> Dictionary:
 func get_runtime_snapshot() -> Dictionary:
 	return {
 		"player_state": get_player_state(),
-		"karma": karma,
+		"karma_temp": karma_temp,
+		"karma_perm": karma_perm,
 		"recent_rainsleep_id": recent_rainsleep_id,
 		"scene_id": current_scene_id,
 	}
 
 
 func record_rainsleep(checkpoint_id: String, player_snapshot: Dictionary) -> void:
+	commit_karma()
 	recent_rainsleep_id = checkpoint_id
 	update_player_state(player_snapshot)
 	restore_player_resources()
@@ -188,9 +195,23 @@ func restore_player_resources() -> void:
 	stats_changed.emit(get_runtime_snapshot())
 
 
-func add_karma(amount: int) -> void:
-	karma += amount
+func add_karma_temp(amount: int) -> void:
+	karma_temp += amount
 	stats_changed.emit(get_runtime_snapshot())
+
+
+func commit_karma() -> void:
+	var converted: int = max(0, karma_temp - KARMA_THRESHOLD)
+	karma_perm += converted
+	karma_temp = 0
+	stats_changed.emit(get_runtime_snapshot())
+
+
+func get_enemy_karma(enemy_id: String) -> int:
+	var enemy_data: Dictionary = design_data.get("enemies", {})
+	var enemy: Dictionary = enemy_data.get(enemy_id, {})
+	var karma_str: String = enemy.get("karma", "1")
+	return int(karma_str) if karma_str.is_valid_int() else 1
 
 
 func handle_player_death() -> Dictionary:
@@ -205,7 +226,8 @@ func save_game() -> void:
 	var payload := {
 		"scene_id": current_scene_id,
 		"recent_rainsleep_id": recent_rainsleep_id,
-		"karma": karma,
+		"karma_temp": karma_temp,
+		"karma_perm": karma_perm,
 		"player_state": current_player_state,
 	}
 	file.store_string(JSON.stringify(payload))
